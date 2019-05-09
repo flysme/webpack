@@ -3,7 +3,7 @@
  * @Author: zhaofeixiang
  * @LastEditors: zhaofeixiang
  * @Date: 2019-05-08 09:28:01
- * @LastEditTime: 2019-05-09 18:06:00
+ * @LastEditTime: 2019-05-09 18:51:09
  */
 
 import './css/main.css'
@@ -66,7 +66,10 @@ function setProps(element, props) {
   }
 }
 
-var state = {num:1};
+var state = {
+  num:1,
+  name:['王思聪','刘小罐']
+};
 var timer;
 
 const nodePatchTypes = {
@@ -85,7 +88,7 @@ function view() {
   return h(
       'div',
       {name:'son'},
-      'Hello World',
+      `Hello ${state.name[Math.floor(Math.random() *2)]}`,
       h(
           'ul',
           null,
@@ -105,20 +108,11 @@ function render (element) {
   var vdom = view();
    var preDom =  createElement(vdom);
    element.appendChild(preDom) 
-
-   timer = setInterval(()=>{
-     state.num++;
-     
-     tickTask(element,vdom);
-   },1000)
 }
 
 
 
 function tickTask (element,preDom) {
-  if (state.num > 20) {
-    return clearInterval(timer)
-  }
   const newDom = view();
   let patchObj = diff(preDom,newDom);
   patch(element,patchObj,1)
@@ -273,4 +267,63 @@ function patchProps(element, props) {
 }
 
 
-render(document.querySelector('#root'))
+// render(document.querySelector('#root'))
+
+
+
+class React {
+  constructor () {
+    this.created && this.created();
+    this.element  =  document.querySelector(this.el)
+    this.vdom = this.render && this.render();
+    this.init();
+  }
+  init () {
+    var preDom =  createElement(this.vdom);
+    this.element.appendChild(preDom) 
+  }
+  tick () {
+    const newVDom = this.render();
+    const patchObj = diff(this.vdom,newVDom);
+    patch(this.element,patchObj,1);
+
+  }
+  setState (obj) {
+    this.state = Object.assign({},this.state,obj);
+    this.tick()
+  }
+}
+
+
+
+class Test extends React {
+  created () {
+    this.el = '#root'
+    this.state = {
+      num:1,
+      name:['王思聪','刘易斯']
+    }
+    timer = setInterval(()=>{
+      this.setState({
+        num:++this.state.num
+      })
+    },1000)
+  }
+  render () {
+    return h(
+          'div',
+          {name:'son'},
+          `Hello ${this.state.name[Math.floor(Math.random() *2)]}`,
+          h(
+              'ul',
+              null,
+              h(
+                  'li',
+                  { id: '1', 'class': 'li-1' },
+                  `${this.state.num}`
+              )
+          )
+    );
+  }
+}
+new Test();
