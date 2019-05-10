@@ -3,12 +3,15 @@
  * @Author: zhaofeixiang
  * @LastEditors: zhaofeixiang
  * @Date: 2019-05-08 09:28:01
- * @LastEditTime: 2019-05-09 18:51:09
+ * @LastEditTime: 2019-05-10 10:23:47
  */
 
 import './css/main.css'
 
 import { greeter } from './greeter'
+
+import './module/demo1/index'
+
 import UTILS from './utils/utils'
 
 console.log(UTILS.getName(),'UTILS')
@@ -66,10 +69,7 @@ function setProps(element, props) {
   }
 }
 
-var state = {
-  num:1,
-  name:['王思聪','刘小罐']
-};
+
 var timer;
 
 const nodePatchTypes = {
@@ -84,39 +84,7 @@ const propPatchTypes = {
   UPDATE: 'update prop'
 }
 
-function view() {
-  return h(
-      'div',
-      {name:'son'},
-      `Hello ${state.name[Math.floor(Math.random() *2)]}`,
-      h(
-          'ul',
-          null,
-          h(
-              'li',
-              { id: '1', 'class': 'li-1' },
-              `${state.num}`
-          )
-      )
-  );
-}
 
-
-
-
-function render (element) {
-  var vdom = view();
-   var preDom =  createElement(vdom);
-   element.appendChild(preDom) 
-}
-
-
-
-function tickTask (element,preDom) {
-  const newDom = view();
-  let patchObj = diff(preDom,newDom);
-  patch(element,patchObj,1)
-}
 
 
 function diff (preDom,newDom){
@@ -239,7 +207,7 @@ function patch(parent, patchObj, index=0) {
 
       // 更新属性
       patchProps(element, props);
-
+      console.log(props,'---props---')
       // 更新子元素
       children.forEach( (patchObj, i) => {
           // 更新子元素时，需要将子元素的序号传入
@@ -267,22 +235,21 @@ function patchProps(element, props) {
 }
 
 
-// render(document.querySelector('#root'))
 
 
 
 class React {
   constructor () {
-    this.created && this.created();
+    this.componentWillmount && this.componentWillmount();
     this.element  =  document.querySelector(this.el)
     this.vdom = this.render && this.render();
-    this.init();
+    this.$init();
   }
-  init () {
-    var preDom =  createElement(this.vdom);
+  $init () {
+    var preDom = createElement(this.vdom);
     this.element.appendChild(preDom) 
   }
-  tick () {
+  $tick () {
     const newVDom = this.render();
     const patchObj = diff(this.vdom,newVDom);
     patch(this.element,patchObj,1);
@@ -290,20 +257,21 @@ class React {
   }
   setState (obj) {
     this.state = Object.assign({},this.state,obj);
-    this.tick()
+    this.$tick()
   }
 }
 
 
 
 class Test extends React {
-  created () {
+  componentWillmount() {
     this.el = '#root'
     this.state = {
       num:1,
       name:['王思聪','刘易斯']
     }
     timer = setInterval(()=>{
+      if (this.state.num > 30) return clearInterval(timer);
       this.setState({
         num:++this.state.num
       })
